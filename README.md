@@ -7,6 +7,7 @@ Counts and prints out the non empty lines of code used by files in a directory.
 |----------|-------|----------------------------------------------------------------------------|
 | --filter | -f    | File extension filter. (e.g. "hpp cpp lua asm")                            |
 | --exclude| -e    | Directories to exclude. (e.g. "ext .vs .git")                              |
+| --comment| -c    | Flag to ignore comments while counting lines                               |
 | --help   | -h    | Prints help text.                                                          |
 
 ## Example usages ##
@@ -17,10 +18,10 @@ Count lines of code in all `.cpp` and `.hpp` files in the `..\root\directory` di
 >ruby loc.rb -f "cpp hpp" -e "ext .vs" ..\root\directory
 ```
 
-Count lines in **all** files in the current directory.
+Count all non comment lines in **all** files in the current directory.
 
 ```bat
->ruby loc.rb
+>ruby loc.rb -c
 ```
 
 ## Example output ##
@@ -37,8 +38,9 @@ ___________________
 total           279
 ```
 
-## Note ##
-Script was made mainly for getting a feel for Ruby. Feel free to suggest changes!
+## Notes ##
+- Script was made mainly for getting a feel for Ruby. Feel free to suggest changes!
+- Currently only the following languages are supported for comment exclusion: C, C++, C#, Lua, Ruby, Python
 
 ## License ##
 
