@@ -10,7 +10,8 @@ $commentInfo = {
   'inl' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
   'lua' => {:regular => '#', :multiStart => '--[===[', :multiEnd => '--]===]'},
   'rb' => {:regular => '#', :multiStart => '=begin', :multiEnd => '=end'},
-  'py' => {:regular => '#', :multiStart => '"""', :multiEnd => '"""'}
+  'py' => {:regular => '#', :multiStart => '"""', :multiEnd => '"""'},
+  'cs' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'}
 }
 
 def count_lines_in_file(fileName, ignoreComments)
