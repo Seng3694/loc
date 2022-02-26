@@ -2,10 +2,43 @@ require 'optparse'
 
 FileEntry = Struct.new(:name, :lines)
 
-def count_lines_in_file(fileName)
+$commentInfo = {
+  'c' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
+  'h' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
+  'cpp' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
+  'hpp' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
+  'inl' => {:regular => '//', :multiStart => '/*', :multiEnd => '*/'},
+  'lua' => {:regular => '#', :multiStart => '--[===[', :multiEnd => '--]===]'},
+  'rb' => {:regular => '#', :multiStart => '=begin', :multiEnd => '=end'},
+  'py' => {:regular => '#', :multiStart => '"""', :multiEnd => '"""'}
+}
+
+def count_lines_in_file(fileName, ignoreComments)
+  fileExt = File.extname(fileName).strip.downcase[1..-1]
+  cinfo = nil
+  if ignoreComments and (not fileExt.nil?) and (not $commentInfo[fileExt].nil?)
+    cinfo = $commentInfo[fileExt]
+  end
+  multiCommentBlock = false
+
   File.foreach(fileName).inject(0) do |count, line|
-    if not line.strip.empty?
-      count + 1
+    line.strip!
+    if not line.empty?
+      if not cinfo.nil?
+        if line.start_with?(cinfo[:multiStart])
+          multiCommentBlock = true
+          count
+        elsif multiCommentBlock and line.start_with?(cinfo[:multiEnd])
+          multiCommentBlock = false
+          count
+        elsif not multiCommentBlock and (not line.start_with?(cinfo[:regular]))
+            count + 1
+        else
+          count
+        end
+      else
+        count + 1
+      end
     else
       count
     end
@@ -14,7 +47,8 @@ end
 
 options = {
   :filter => '',
-  :exclude => ''
+  :exclude => '',
+  :comments => false
 }
 OptionParser.new do |opt|
   opt.banner = 'Usage: loc.rb [options] root_directory'
@@ -24,6 +58,9 @@ OptionParser.new do |opt|
   end
   opt.on('-e', '--exclude EXCLUDEDDIRS', 'eg. "ext .vs .git"') do |o| 
     options[:exclude] = o 
+  end
+  opt.on('-c', '--comments', TrueClass, 'ignores comments while counting lines.') do |o|
+    options[:comments] = o.nil? ? true : o
   end
 end.parse!
 
@@ -59,7 +96,7 @@ for fileName in fileNames
   end
 
   if isValid
-    fileEntries << FileEntry.new(fileName, count_lines_in_file(fileName))
+    fileEntries << FileEntry.new(fileName, count_lines_in_file(fileName, options[:comments]))
   end
 end
 
